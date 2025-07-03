@@ -3,36 +3,25 @@ import json
 
 app = Flask(__name__)
 
-# Load your JSON file once at startup
-with open('programs_cleaned.json', 'r') as f:
+# Load JSON data once at startup
+with open("programs_cleaned.json", "r") as f:
     programs = json.load(f)
 
-@app.route('/programs', methods=['GET'])
+@app.route("/programs", methods=["GET"])
 def get_programs():
-    # Optional search with ?q=yoursearch
-    query = request.args.get('q', '').strip().lower()
-    if query:
-        filtered = [
-            {
-                "Program Title": p["Program Title"],
-                "Full URL": p["Full URL"]
-            }
-            for p in programs
-            if query in p["Program Title"].lower()
-        ]
-        return jsonify(filtered)
-    # Return all programs if no query
-    return jsonify([
-        {
-            "Program Title": p["Program Title"],
-            "Full URL": p["Full URL"]
-        }
-        for p in programs
-    ])
+    query = request.args.get("q", "").strip().lower()
+    if not query:
+        return jsonify([])
 
-@app.route('/', methods=['GET'])
-def root():
-    return jsonify({"message": "PEMF Healing App API is online. Use /programs to access data."})
+    results = []
+    for p in programs:
+        title = p.get("Program Title", "").lower()
+        category = p.get("Category", "").lower()
+        if query in title or query in category:
+            results.append({
+                "Program Title": p.get("Program Title", ""),
+                "Full URL": p.get("Full URL", ""),
+                "Category": p.get("Category", "")
+            })
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    return jsonify(results)

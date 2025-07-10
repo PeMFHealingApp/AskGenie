@@ -1,5 +1,10 @@
+import logging
 from flask import Flask, jsonify, request
 import json
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logging.getLogger().setLevel(logging.WARNING)
 
 app = Flask(__name__)
 
@@ -30,4 +35,4 @@ def get_programs():
     return jsonify(results)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=False)

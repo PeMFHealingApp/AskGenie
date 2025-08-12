@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Programs JSON Editor</title>
+  <style>
+    :root { --bg:#0b0f14; --panel:#121924; --muted:#7a8aa0; --text:#e6edf3; --accent:#4da3ff; --ok:#30d158; --warn:#ff9f0a; --err:#ff453a; }
+    * { box-sizing:border-box }
+    html, body { height:100% }
+    body { margin:0; font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"; background:var(--bg); color:var(--text) }
+    header { padding:20px; border-bottom:1px solid #1f2a37; background:linear-gradient(180deg,#0e141d 0%, #0b0f14 100%) }
+    h1 { margin:0; font-size:20px; letter-spacing:.2px }
+    .wrap { max-width:1100px; margin:0 auto; padding:20px }
+    .grid { display:grid; grid-template-columns: 1.2fr .8fr; gap:18px }
+    .card { background:var(--panel); border:1px solid #1f2a37; border-radius:14px; box-shadow: 0 4px 20px rgba(0,0,0,.2) }
+    .card h2 { margin:0 0 12px; font-size:16px }
+    .card .body { padding:16px }
+    label { display:block; font-size:12px; color:var(--muted); margin:12px 0 6px }
+    input[type="text"], input[type="url"], input[type="search"] { width:100%; padding:10px 12px; border-radius:10px; border:1px solid #273445; background:#0d141d; color:var(--text) }
+    input::placeholder { color:#6b7a90 }
+    button { appearance:none; border:0; background:var(--accent); color:#05111f; font-weight:700; padding:10px 14px; border-radius:10px; cursor:pointer }
+    button.ghost { background:transparent; color:var(--accent); border:1px solid #273445 }
+    button.warn { background:var(--warn); color:#2c1600 }
+    button.ok { background:var(--ok); color:#00240d }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+    .spacer { flex:1 }
+    .table { width:100%; overflow:auto; border-radius:12px; border:1px solid #1f2a37 }
+    table { width:100%; border-collapse:separate; border-spacing:0 }
+    thead th { position:sticky; top:0; background:#101826; text-align:left; font-size:12px; color:var(--muted); padding:10px; border-bottom:1px solid #1f2a37 }
+    tbody td { padding:10px; border-bottom:1px solid #1a2533; vertical-align:top }
+    tbody tr:hover { background:#0f1723 }
+    code.url { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; color:#b7d2ff }
+    .pill { display:inline-block; font-size:12px; padding:4px 8px; border-radius:999px; background:#0d1622; border:1px solid #2a3a52; color:#b9c7d8 }
+    .hint { font-size:12px; color:var(--muted) }
+    .footer { padding:14px 16px; border-top:1px solid #1f2a37; background:#0e1521; border-radius:0 0 14px 14px }
+    .danger { color:var(--err) }
+    .success { color:var(--ok) }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px }
+    .hidden { display:none }
+    @media (max-width: 980px){ .grid{ grid-template-columns:1fr } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap row">
+      <h1>Programs JSON Editor</h1>
+      <div class="spacer"></div>
+      <a id="repoLink" class="pill" href="https://github.com/PeMFHealingApp/AskGenie/blob/main/programs_cleaned.json" target="_blank" rel="noreferrer">View JSON on GitHub</a>
+    </div>
+  </header>
+
+  <div class="wrap grid">
+    <!-- Left: Data table -->
+    <section class="card" aria-labelledby="listHeading">
+      <div class="body">
+        <h2 id="listHeading">Current entries</h2>
+        <div class="row" style="margin-bottom:10px">
+          <input id="search" type="search" placeholder="Filter by title or category" aria-label="Filter entries" />
+          <div class="spacer"></div>
+          <button class="ghost" id="reloadBtn" title="Reload from source">Reload</button>
+        </div>
+        <div class="table" id="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:24px">#</th>
+                <th>Category</th>
+                <th>Title</th>
+                <th>URL</th>
+                <th style="width:90px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr><td colspan="5" class="hint">Loading entries</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="footer row">
+        <span class="hint">Entries are kept in memory and can be exported as an updated JSON file.</span>
+        <div class="spacer"></div>
+        <button id="copyBtn" class="ghost">Copy JSON</button>
+        <button id="downloadBtn">Download programs_cleaned.json</button>
+      </div>
+    </section>
+
+    <!-- Right: Controls -->
+    <aside class="card" aria-labelledby="controlsHeading">
+      <div class="body">
+        <h2 id="controlsHeading">Add or load</h2>
+
+        <label for="srcUrl">Source JSON URL</label>
+        <input id="srcUrl" type="url" placeholder="https://raw.githubusercontent.com/.../programs_cleaned.json" />
+        <div class="row" style="margin-top:8px">
+          <button id="loadBtn">Load URL</button>
+          <input type="file" id="fileInput" accept="application/json" />
+        </div>
+        <p class="hint">Tip: use the Raw link. Default is the PeMFHealingApp repo.</p>
+
+        <hr style="border:0;border-top:1px solid #1f2a37; margin:16px 0" />
+
+        <h2 style="margin-top:0">New entry</h2>
+        <label for="cat">Program category</label>
+        <input id="cat" type="text" placeholder="e.g., Solfeggio" />
+
+        <label for="title">Program title</label>
+        <input id="title" type="text" placeholder="Exact program title" />
+
+        <label for="url">Program URL</label>
+        <input id="url" type="url" placeholder="https://www.pemfhealing.app/..." />
+
+        <div class="row" style="margin-top:12px">
+          <button id="addBtn" class="ok">Add to list</button>
+          <button id="clearFormBtn" class="ghost">Clear</button>
+        </div>
+
+        <p id="status" class="hint" style="margin-top:12px"></p>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // Default raw URL to the repo JSON
+    const DEFAULT_RAW = "https://raw.githubusercontent.com/PeMFHealingApp/AskGenie/refs/heads/main/programs_cleaned.json";
+
+    let data = []; // in-memory array of entries
+
+    const els = {
+      rows: document.getElementById('rows'),
+      tableWrap: document.getElementById('tableWrap'),
+      search: document.getElementById('search'),
+      srcUrl: document.getElementById('srcUrl'),
+      loadBtn: document.getElementById('loadBtn'),
+      reloadBtn: document.getElementById('reloadBtn'),
+      fileInput: document.getElementById('fileInput'),
+      cat: document.getElementById('cat'),
+      title: document.getElementById('title'),
+      url: document.getElementById('url'),
+      addBtn: document.getElementById('addBtn'),
+      clearFormBtn: document.getElementById('clearFormBtn'),
+      status: document.getElementById('status'),
+      copyBtn: document.getElementById('copyBtn'),
+      downloadBtn: document.getElementById('downloadBtn')
+    };
+
+    // Util
+    const isHttpUrl = (s) => {
+      try { const u = new URL(s); return u.protocol === 'http:' || u.protocol === 'https:' } catch { return false }
+    };
+
+    function render(filter = ''){
+      const q = filter.trim().toLowerCase();
+      const rows = [];
+      const items = q
+        ? data.filter(x => (x.category||'').toLowerCase().includes(q) || (x.title||'').toLowerCase().includes(q))
+        : data;
+
+      if(items.length === 0){
+        els.rows.innerHTML = '<tr><td colspan="5" class="hint">No entries found</td></tr>';
+        return;
+      }
+
+      items.forEach((item, idx) => {
+        const index = data.indexOf(item) + 1;
+        const safeUrl = item.url || item.link || '';
+        rows.push(`
+          <tr>
+            <td class="mono">${index}</td>
+            <td><span class="pill">${escapeHtml(item.category || '')}</span></td>
+            <td>${escapeHtml(item.title || '')}</td>
+            <td><a href="${escapeAttr(safeUrl)}" target="_blank" class="mono url" rel="noreferrer">${escapeHtml(safeUrl)}</a></td>
+            <td>
+              <button class="ghost" onclick="editEntry(${index-1})" title="Edit">Edit</button>
+              <button class="warn" onclick="removeEntry(${index-1})" title="Remove">Remove</button>
+            </td>
+          </tr>`);
+      });
+
+      els.rows.innerHTML = rows.join('');
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+    function escapeAttr(s){
+      return String(s).replace(/[\"<>`]/g, '');
+    }
+
+    async function loadFromUrl(url){
+      els.status.textContent = 'Fetching JSON from source';
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if(Array.isArray(json)) data = json;
+        else if(Array.isArray(json.programs)) data = json.programs;
+        else if(Array.isArray(json.items)) data = json.items;
+        else throw new Error('Unsupported JSON shape');
+        localStorage.setItem('programs_json_backup', JSON.stringify(data));
+        els.status.textContent = 'Loaded ' + data.length + ' entries';
+        render(els.search.value);
+      } catch(err){
+        console.error(err);
+        // Fallback to local backup if present
+        const backup = localStorage.getItem('programs_json_backup');
+        if(backup){
+          data = JSON.parse(backup);
+          els.status.innerHTML = 'Could not fetch. Loaded local backup with ' + data.length + ' entries. <span class="danger">Check CORS or URL</span>';
+          render(els.search.value);
+        } else {
+          els.rows.innerHTML = '<tr><td colspan="5" class="danger">Failed to load JSON. Use file upload or correct the URL.</td></tr>';
+          els.status.innerHTML = '<span class="danger">Load failed</span>';
+        }
+      }
+    }
+
+    function addEntry(){
+      const category = els.cat.value.trim();
+      const title = els.title.value.trim();
+      const url = els.url.value.trim();
+
+      if(!category || !title || !url){
+        els.status.innerHTML = '<span class="danger">Please fill all fields</span>';
+        return;
+      }
+      if(!isHttpUrl(url)){
+        els.status.innerHTML = '<span class="danger">Enter a valid http or https URL</span>';
+        return;
+      }
+      data.push({ category, title, url });
+      localStorage.setItem('programs_json_backup', JSON.stringify(data));
+      render(els.search.value);
+      els.status.innerHTML = '<span class="success">Added entry</span>';
+      clearForm();
+    }
+
+    function clearForm(){ els.cat.value=''; els.title.value=''; els.url.value='' }
+
+    function removeEntry(idx){
+      if(!confirm('Remove this entry from the list?')) return;
+      data.splice(idx, 1);
+      localStorage.setItem('programs_json_backup', JSON.stringify(data));
+      render(els.search.value);
+      els.status.innerHTML = '<span class="success">Removed</span>';
+    }
+
+    function editEntry(idx){
+      const item = data[idx];
+      els.cat.value = item.category || '';
+      els.title.value = item.title || '';
+      els.url.value = item.url || item.link || '';
+      // Replace add behavior with save for this edit action
+      els.addBtn.textContent = 'Save changes';
+      els.addBtn.onclick = () => {
+        const category = els.cat.value.trim();
+        const title = els.title.value.trim();
+        const url = els.url.value.trim();
+        if(!category || !title || !url){
+          els.status.innerHTML = '<span class="danger">Please fill all fields</span>';
+          return;
+        }
+        if(!isHttpUrl(url)){
+          els.status.innerHTML = '<span class="danger">Enter a valid http or https URL</span>';
+          return;
+        }
+        data[idx] = { category, title, url };
+        localStorage.setItem('programs_json_backup', JSON.stringify(data));
+        render(els.search.value);
+        els.status.innerHTML = '<span class="success">Updated entry</span>';
+        els.addBtn.textContent = 'Add to list';
+        els.addBtn.onclick = addEntry;
+        clearForm();
+      };
+    }
+
+    function downloadJson(){
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'programs_cleaned.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyJson(){
+      const text = JSON.stringify(data, null, 2);
+      navigator.clipboard.writeText(text).then(() => {
+        els.status.innerHTML = '<span class="success">JSON copied to clipboard</span>';
+      }, () => {
+        els.status.innerHTML = '<span class="danger">Copy failed</span>';
+      });
+    }
+
+    // Wire up events
+    els.addBtn.onclick = addEntry;
+    els.clearFormBtn.onclick = () => { clearForm(); els.addBtn.textContent = 'Add to list'; els.addBtn.onclick = addEntry };
+    els.downloadBtn.onclick = downloadJson;
+    els.copyBtn.onclick = copyJson;
+    els.search.oninput = () => render(els.search.value);
+
+    els.loadBtn.onclick = () => {
+      const u = els.srcUrl.value.trim();
+      if(!u) { els.status.innerHTML = '<span class="danger">Enter a source URL</span>'; return }
+      if(!isHttpUrl(u)) { els.status.innerHTML = '<span class="danger">Invalid URL</span>'; return }
+      loadFromUrl(u);
+    };
+
+    els.reloadBtn.onclick = () => {
+      const u = els.srcUrl.value.trim() || DEFAULT_RAW;
+      loadFromUrl(u);
+    };
+
+    els.fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        if(Array.isArray(json)) data = json;
+        else if(Array.isArray(json.programs)) data = json.programs;
+        else if(Array.isArray(json.items)) data = json.items;
+        else throw new Error('Unsupported JSON shape');
+        localStorage.setItem('programs_json_backup', JSON.stringify(data));
+        els.status.textContent = 'Loaded ' + data.length + ' entries from file';
+        render(els.search.value);
+      } catch(err){
+        els.status.innerHTML = '<span class="danger">Invalid JSON file</span>';
+      }
+    });
+
+    // Init
+    (function init(){
+      els.srcUrl.value = DEFAULT_RAW;
+      const backup = localStorage.getItem('programs_json_backup');
+      if(backup){
+        try { data = JSON.parse(backup); render(); els.status.textContent = 'Loaded local backup with ' + data.length + ' entries' } catch {}
+      }
+      loadFromUrl(DEFAULT_RAW);
+    })();
+  </script>
+</body>
+</html>

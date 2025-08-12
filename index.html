@@ -15,7 +15,7 @@
   <input type="text" id="title" required><br><br>
   URL:<br>
   <input type="url" id="url" required><br><br>
-  <button type="button" onclick="addEntry()">Add Entry</button>
+  <button type="button" id="addBtn" onclick="addEntry()">Add Entry</button>
 </form>
 
 <h2>Entries</h2>
@@ -24,6 +24,7 @@
     <th>Category</th>
     <th>Title</th>
     <th>URL</th>
+    <th>Actions</th>
   </tr>
 </table>
 
@@ -32,6 +33,7 @@
 
 <script>
 let entries = [];
+let editIndex = -1;
 
 function addEntry() {
   const category = document.getElementById('category').value.trim();
@@ -43,15 +45,62 @@ function addEntry() {
     return;
   }
 
-  entries.push({ category, title, url });
+  if (editIndex === -1) {
+    entries.push({ category, title, url });
+  } else {
+    entries[editIndex] = { category, title, url };
+    editIndex = -1;
+    document.getElementById('addBtn').textContent = "Add Entry";
+  }
 
-  const table = document.getElementById('entriesTable');
-  const row = table.insertRow();
-  row.insertCell(0).textContent = category;
-  row.insertCell(1).textContent = title;
-  row.insertCell(2).textContent = url;
-
+  renderTable();
   document.getElementById('entryForm').reset();
+}
+
+function renderTable() {
+  const table = document.getElementById('entriesTable');
+  table.innerHTML = `
+    <tr>
+      <th>Category</th>
+      <th>Title</th>
+      <th>URL</th>
+      <th>Actions</th>
+    </tr>
+  `;
+
+  entries.forEach((entry, index) => {
+    const row = table.insertRow();
+    row.insertCell(0).textContent = entry.category;
+    row.insertCell(1).textContent = entry.title;
+    row.insertCell(2).textContent = entry.url;
+    const actions = row.insertCell(3);
+
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.onclick = () => editEntry(index);
+    actions.appendChild(editBtn);
+
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "Remove";
+    removeBtn.onclick = () => removeEntry(index);
+    actions.appendChild(removeBtn);
+  });
+}
+
+function editEntry(index) {
+  const entry = entries[index];
+  document.getElementById('category').value = entry.category;
+  document.getElementById('title').value = entry.title;
+  document.getElementById('url').value = entry.url;
+  editIndex = index;
+  document.getElementById('addBtn').textContent = "Save Changes";
+}
+
+function removeEntry(index) {
+  if (confirm("Remove this entry?")) {
+    entries.splice(index, 1);
+    renderTable();
+  }
 }
 
 function downloadJSON() {

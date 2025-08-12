@@ -8,16 +8,13 @@
 
 <h1>Programs JSON Editor</h1>
 
-<form id="entryForm">
-  <label>Category:<br>
-    <input type="text" id="category" required>
-  </label><br><br>
-  <label>Title:<br>
-    <input type="text" id="title" required>
-  </label><br><br>
-  <label>URL:<br>
-    <input type="url" id="url" required>
-  </label><br><br>
+<form id="entryForm" onsubmit="return false;">
+  Category:<br>
+  <input type="text" id="category" required><br><br>
+  Title:<br>
+  <input type="text" id="title" required><br><br>
+  URL:<br>
+  <input type="url" id="url" required><br><br>
   <button type="button" onclick="addEntry()">Add Entry</button>
 </form>
 

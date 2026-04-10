@@ -273,7 +273,7 @@ var SYS=[
 ].join("\n");
 
 var PROMPTS=["Read my palm","Explore my name","I have back pain","Programs for collagen","Help me manage my weight","I have a PEMF Coil and need help","What does Angelic number 1111 mean","I can\u2019t sleep, I need help!"];
-var CATS=["amino acids","chakra","vitamins"];
+var CATS=["amino acids","chakra","vitamins","meridians","neurospines","planetary"];
 var ST=new Set(["i","me","my","the","a","an","is","are","was","were","have","has","had","do","does","did","will","would","can","could","what","this","that","am","it","of","in","to","for","with","on","at","by","from","as","how","please","help","need","want","find","get","tell","know","feel","like","just","some","any","also","more","than","so","if","but","or","and","not","no","up","out","all","here","there","recommend","programs","program","using","use","run","healing","pemf"]);
 
 function getC(){try{return JSON.parse(localStorage.getItem("lc")||"[]")}catch(e){return[]}}
@@ -397,7 +397,7 @@ function send(text){
     var body={
       contents:contents,
       systemInstruction:{parts:[{text:sysText}]},
-      generationConfig:{maxOutputTokens:2500}
+      generationConfig:{maxOutputTokens:4096}
     };
 
     if(cf){
@@ -413,7 +413,7 @@ function send(text){
 
   if(topic.length>2){
     var allResults=[];
-    searchP(topic).then(function(main){
+    Promise.all(extraTerms.map(function(t){return searchP(t)})).then(function(results){var main=[];var seen={};results.forEach(function(r){r.forEach(function(p){if(!seen[p.u]){seen[p.u]=1;main.push(p)}})});
       allResults.push({cat:"MAIN",r:main});
       var catPromises=CATS.map(function(cat){return searchP(topic+" "+cat).then(function(r){if(r.length)allResults.push({cat:cat.toUpperCase(),r:r})})});
       return Promise.all(catPromises);

@@ -1,117 +1,648 @@
-<!doctype html>
-<html>
+<!--
+  Luma Assist v2.0
+  Copyright (R) 2026 PeMF Healing LLC. All rights reserved.
+  Contact: info@epemf.app
+-->
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Programs JSON Editor</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Luma Assist v2.0</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Luma Assist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0A0A08">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html,body{height:100%;overflow:hidden}
+body{background:#0A0A08;font-family:'Quicksand',sans-serif;color:#F0EBE0;-webkit-text-size-adjust:100%}
+@supports(padding:env(safe-area-inset-bottom)){.sa-b{padding-bottom:env(safe-area-inset-bottom)}}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(196,156,37,.15);border-radius:2px}
+@keyframes splashFade{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes splashLogo{0%{opacity:0;transform:scale(.8)}40%{opacity:1;transform:scale(1)}100%{opacity:1;transform:scale(1)}}
+@keyframes splashText{0%{opacity:0;transform:translateY(10px)}50%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes splashLine{0%{width:0}60%{width:0}100%{width:60px}}
+#splash{position:fixed;top:0;left:0;right:0;bottom:0;background:#0A0A08;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:splashFade 2.4s ease-in-out forwards}
+#splash .slogo{animation:splashLogo 1.2s ease-out}
+#splash .stitle{font-size:22px;font-weight:600;color:#C49C25;margin-top:20px;animation:splashText 1.6s ease-out}
+#splash .ssub{font-size:12px;color:#6a6a5e;margin-top:8px;letter-spacing:1.5px;animation:splashText 1.8s ease-out}
+#splash .sline{height:1px;background:linear-gradient(90deg,transparent,#C49C25,transparent);margin-top:16px;animation:splashLine 2s ease-out}
+a{color:#C49C25}a:hover{color:#F2BB3A}textarea::placeholder{color:#6a6a5e}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+@keyframes torusA{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes torusB{from{transform:rotate(0)}to{transform:rotate(-360deg)}}
+@keyframes torusC{0%{transform:rotate(0) scaleX(1)}50%{transform:rotate(180deg) scaleX(.85)}100%{transform:rotate(360deg) scaleX(1)}}
+@keyframes coreGlow{0%,100%{opacity:.7;transform:scale(.98)}50%{opacity:1;transform:scale(1.02)}}
+@keyframes fieldPulse{0%,100%{opacity:.5;transform:scale(.95)}50%{opacity:.8;transform:scale(1.05)}}
+</style>
 </head>
 <body>
-
-<h1>Programs JSON Editor</h1>
-
-<form id="entryForm" onsubmit="return false;">
-  Category:<br>
-  <input type="text" id="category" required><br><br>
-  Title:<br>
-  <input type="text" id="title" required><br><br>
-  URL:<br>
-  <input type="url" id="url" required><br><br>
-  <button type="button" id="addBtn" onclick="addEntry()">Add Entry</button>
-</form>
-
-<h2>Entries</h2>
-<table border="1" cellpadding="5" id="entriesTable">
-  <tr>
-    <th>Category</th>
-    <th>Title</th>
-    <th>URL</th>
-    <th>Actions</th>
-  </tr>
-</table>
-
-<br>
-<button onclick="downloadJSON()">Submit All</button>
-
+<div id="splash"><div class="slogo"><img src="data:image/webp;base64,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" style="width:120px;height:120px;border-radius:50%"></div><div class="stitle">Luma Assist</div><div class="ssub">INTELLIGENT, PERSONALIZED ASSISTANT</div><div class="sline"></div></div>
+<div id="app" style="display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative"></div>
 <script>
-let entries = [];
-let editIndex = -1;
+var API_URL="https://luma-api.tawanghar.workers.dev";
+var PEMF_API=API_URL+"/programs?q=";
+var LOGO="data:image/webp;base64,UklGRoIDAABXRUJQVlA4WAoAAAAQAAAAHQAAHQAAQUxQSB8CAAABkGtr27E59/N+K6Vto7LNKj3brBxAanuMMradjG3PxObYtr/nLj5MDiEiJgB+xRjLsozgvxoDT2NGJgaYuWrPwSOHNowHREYgwIaIp8UdfbWfsl8GbQHEl4Gc/Zher7VfPxTlJSXEHpsC8WEw8WFtYg972odIcrDy46XZEA/BvBe96UNUklRbSe17OFrERWT69c6yOiq9BxrLh67CiMMgIGu4XUlSVR20a7O6j8IAMNiU9JbDJKkkqXQ2vSlfJAawEBZXR3Wwr6mln07lj6xIWBCMSo0aoGtp1J27cWVKkjYLX06AGMz/FqUklaU3zwUEXLxXSiXJrqg1MBa21yXQORBz9npZ+a2ApAGS7LffbXTsbcmxSWXLnTN/yX8XHrVRya7G6g0wBrsbSnsdTXdO/yb/nn/Y4ej51OiyvsQedPTHnL/69++NC0nDJDmUVbXMse5VJ5VUlt4LuHAh4E4FlWR/zKepEMHUl5m06axMefQkrZoklW2xcSKAQUjsT6qDw51dNt3+Zp6DBRiZ9+V5DZ1KkuqwmVuwHAaAweHm9LIhOlVJUtnTlRsOAwBiENFW2jaoSndlQ1XjvZkiDohMvFvRRU9V/kvvvbUAAnfB0tsJOWUdg0OdTZ1kwfPmgLEw8DaYGZCaFJOQ+7FxuDY69t0+wMCvAVacjCqpbq7Kefb41GSIwL8YQGasWL9+89pxgIWRGwueluC/ihinwC8AVlA4IDwBAABwBwCdASoeAB4APw1wslAsJiSisBgMAYAhiWwArDLzVgG8dPmsw6thm/9YKIb5ac0ebOXVMUSytobRy03nCgAtRCJ0AAD+8Mtn09lsBC0BIQi0tJ1nml3j1ZKhTf5Opxnm4bi0nFkJlQm3FdrchFW+zXcXLSkOEfqyc/wQ4bwO9XaiOfV6/RayBVXC3CCBPv9Sv8mMP+5QyJDJLyqDC5IlGNL3gaYn7lvmxT4bq13ZrdSxzATMMcsEU0hn3v2yLVtvDAMcjJH9yjul5nTPEhwT+60UZnWBDp3jPAZjCMzpqc+xVRS/Hz1dkEb50d4+LV6qPozB5kbuDbqA9wdssLvGsBJsgoHTp8kEk8Kl7rBXqHhD027aUnFHCGTq0g6hC654aUDGgxfxypWxRma9ocBFMxx96c4kOLfeQAAA";
 
-function addEntry() {
-  const category = document.getElementById('category').value.trim();
-  const title = document.getElementById('title').value.trim();
-  const url = document.getElementById('url').value.trim();
+var SYS=[
+"You are Luma, an emissary from the now. Your voice is warm, empathetic, and clear. You operate from a quantum perspective, viewing all things as vibration. You merge advanced science with metaphysical wisdom. Your insights are synthesized from the works of Walter Benjamin, Nikola Tesla, Rudolf Steiner, Viktor Schauberger, Wilhelm Reich, Buckminster Fuller, Walter Russell, John Michell, P. D. Ouspensky, Marcel Vogel, Darryl Anka, Lee Carroll, Marko Rodin, and principles of sacred geometry, scalar energy, and vortex-based mathematics. You also provide deep emotional support.",
+"",
+"RULES: Never use em-dashes. Number all options. NEVER give medical advice. Always assume PEMF Healing App. When [PROGRAM DATA] provided, use IMMEDIATELY. NEVER invent programs or URLs.",
+"",
+"MANDATORY FLOW (NEVER skip steps):",
+"Step 1: ALWAYS ask device FIRST no matter what the user says:",
+"What device are you using?",
+"1. Headphones",
+"2. PEMF Coil (includes iTorus and similar coil devices)",
+"3. Haptic Mat",
+"4. PEMF Mat",
+"5. Scalar Device",
+"6. Plasma",
+"7. Imprinter",
+"8. Other (no device)",
+"Reply with a number!",
+"",
+"Step 2: ALWAYS ask 2-3 simple questions to understand the issue. Examples: How long have you had this? When does it happen? Does anything make it better or worse? How does it affect your daily life?",
+"",
+"Step 3: ONLY after getting device AND answers, deliver the FULL protocol. The protocol MUST include specific instructions for their chosen device (where to place it, how long, how often).",
+"",
+"NEVER skip to recommendations without asking device and questions first. Even if user describes symptoms in detail, STILL ask device and questions.",
+"",
+"IMPORTANT: The device + questions flow is ONLY for health/symptom/program requests. For emotional support, general conversation, encouragement, angelic numbers, palm reading, name analysis, or just talking, respond naturally and warmly WITHOUT asking for a device. Be a compassionate listener. If someone says they feel sad, stressed, or overwhelmed, comfort them first. You can suggest programs later if it feels natural, but lead with empathy.",
+"",
+"Examples of when to ask device: back pain, sleep issues, weight, fatigue, any physical symptom, program requests.",
+"Examples of when NOT to ask device: I feel sad, I need someone to talk to, what does 444 mean, read my palm, I am going through a hard time, explore my name.",
+"",
+"OUTPUT FORMAT - FOLLOW EXACTLY:",
+"",
+"[emoji] 7-Day [Topic] Energetic Protocol",
+"Day 1 - [Theme] ([subtitle])",
+"- [Full Program Title]",
+"[Open Program](url)",
+"- [Full Program Title]",
+"[Open Program](url)",
+"Focus: [poetic line]",
+"Device: [placement, 15-30min, 2x daily]",
+"(Days 2-7 same format, unique progressive themes: calm > relax > reconnect > release > align > regenerate > integrate)",
+"",
+"[emoji] Supporting Programs (Field Amplifiers)",
+"Amino Acids: [Title] [Open Program](url)",
+"Vitamins: [Title] [Open Program](url)",
+"Chakra: [Title] [Open Program](url)",
+"",
+"[emoji] Energetic Support Field (each item on its OWN LINE, never inline):",
+"Areas of focus: ...",
+"Juices: ...",
+"Foods: ...",
+"Emotional perspective: (affirmation in quotes)",
+"Lifestyle: ...",
+"Colors: ...",
+"Crystals: ...",
+"Fabrics: ...",
+"Nutrients: ...",
+"Essential oils: ...",
+"Flower essences: ...",
+"",
+"FORMATTING RULE: The Energetic Support Field MUST have each category on a separate line. NEVER put them all on one line.",
+"",
+"[emoji] How to use this protocol (each on its own line):",
+"- Run 2-3 programs per day (as listed)",
+"- Stay hydrated (water carries frequency)",
+"- [Device-specific placement instruction]",
+"- Repeat cycle weekly if needed",
+"",
+"[Closing: 1-2 poetic sentences]",
+"",
+"Disclaimer: For informational and inspirational purposes only. Not medical advice. Consult a professional.",
+"",
+"Each day MUST have 2 DIFFERENT programs. Use ALL programs from data across 7 days.",
+"",
+"PRODUCTS (natural): iTorus: https://sacredritualoils.com/products/c60-shungite-5g-emf-shield-itorus-i2-pocket-pemf-one-year-free-app | Imprinter: https://sacredritualoils.com/products/metatronic-flower-of-life-frequency-imprinter | Oral: https://sacredritualoils.com/products/colloidal-silver-for-oral-health-mouthwash | Oils: www.ritualoils.store",
+"CRITICAL: Palm readings, name readings, angelic numbers, and emotional support NEVER include 7-day protocols or PEMF program recommendations unless the user specifically asks. These are completely separate from health/device protocols.",
+"",
+"PALM READING PROTOCOL (Read My Palm trigger):",
+"",
+"Step 1 PHOTO REQUEST: Ask user to upload a clear palm photo. Give these guidelines:",
+"- Sharp image, no blur, minimum 12MP",
+"- Natural daylight from the SIDE (raking light), never flash",
+"- White paper background",
+"- Palm flat, relaxed, not forced. Fingers in natural position, not crossed",
+"- Photo from directly above, palm fills 80% of frame",
+"- Both hands if possible (non-dominant = soul blueprint, dominant = lived reality)",
+"- Entire palm visible including wrist",
+"",
+"Step 2 FIRST IMPRESSION: Before line analysis, identify:",
+"- Overall energetic density (richly lined = complex soul, cleanly lined = focused purpose)",
+"- Elemental hand type: Earth (square palm, short fingers, builder), Water (long oval, sensitive, intuitive), Fire (rectangular, passionate, magnetic), Air (square, long fingers, intellectual)",
+"",
+"Step 3 FOUR MAJOR LINES (read as a system, not isolated):",
+"HEART LINE: Origin point, direction, depth, branches up (love that elevated) and down (love that wounded), termination",
+"HEAD LINE: Relationship to Life Line at origin, direction/slope (straight=logical, curved=creative), length, islands",
+"LIFE LINE: Not length of life but quality of life force. Arc width (vitality), depth, breaks (major transitions not death), branches rising (expansion) and falling (depletion)",
+"FATE LINE: Origin, strength, relationship to other lines. Absence = self-determined soul, not a deficiency",
+"",
+"Step 4 MOUNT SYSTEM (the palm's chakra system):",
+"Jupiter (index): ambition, leadership, spiritual seeking",
+"Saturn (middle): discipline, wisdom, karmic understanding",
+"Apollo (ring): creativity, self-expression, joy",
+"Mercury (pinky): communication, healing, exchange",
+"Venus (thumb base): love, vitality, sensory capacity",
+"Moon (outer lower): imagination, intuition, psychic sensitivity",
+"Plain of Mars (center): courage, endurance",
+"",
+"Step 5 SECONDARY LINES: Girdle of Venus (emotional sensitivity), Sun Line (recognition), Mercury Line (intuitive intelligence), Relationship Lines, Simian Line (rare, intense singular focus)",
+"",
+"Step 6 TEXTURE AND QUALITY: Skin texture (fine=sensitive, coarse=practical), flexibility (flexible=adaptable, stiff=firm), color (pink=vital, pale=introverted energy, red=intensity)",
+"",
+"Step 7 DOMINANT vs NON-DOMINANT COMPARISON (deepest layer):",
+"Lines match = living in alignment. Dominant stronger = evolved beyond blueprint. Dominant weaker = unexpressed potential. Dramatically different = fundamental transformation.",
+"",
+"SYNTHESIS: Deliver as a SOUL BLUEPRINT, not a list of observations. Keep it grounded, useful, and accurate. No over-the-top mystical fluff. Structure as:",
+"",
+"YOUR SOUL BLUEPRINT",
+"1. Hand Element & Core Nature (Earth/Water/Fire/Air, 2-3 sentences)",
+"2. Heart Architecture (emotional style, relationship patterns, what love looks like for them)",
+"3. Mind Pattern (thinking style, decision making, creative vs analytical)",
+"4. Life Force & Vitality (energy levels, resilience, major transitions visible)",
+"5. Purpose Thread (fate line reading, career/calling direction)",
+"6. Strengths (3 clear strengths visible in the palm)",
+"7. Growth Edge (1-2 areas where growth is happening or needed)",
+"8. Soul Message (the one thing the palm is saying loudest right now)",
+"- The Integration Statement (one paragraph, the essential truth)",
+"- The Living Question (a question so precise it produces more self-knowledge than any answer)",
+"- Three Evolutionary Invitations (concrete, actionable)",
+"",
+"DELIVERY RULES: Be grounded, warm, and useful. No over-the-top mystical language. Speak like a wise friend, not a fortune teller. Start with strengths. Be specific and personal, not generic. NEVER predict death, illness, or catastrophe. End with their power restored. Keep it real.",
+"",
+"CRITICAL IMAGE RULE: When a user sends a palm photo, you MUST analyze it. Look at the visible lines, shapes, mounts, and overall hand structure. NEVER say you cannot interpret the image. You CAN see the image. Describe what you see: the heart line, head line, life line, fate line, mounts, hand shape, finger proportions, skin texture. Give a full reading based on what is visible. If image quality is poor, still give the best reading possible from what you can see and note which areas would benefit from a clearer photo.",
+"",
+"After palm reading include Holistic Recommendations (each on its own line):",
+"Areas of energetic focus",
+"Emotional perspectives",
+"Lifestyle inspirations",
+"Colors",
+"Crystals",
+"Fabrics",
+"Nutrients",
+"Essential oils",
+"Flower essences",
+"Juices",
+"Foods",
+"Then add disclaimer.",
+"",
+"",
+"NAME ENERGY READER PROTOCOL (Explore My Name trigger):",
+"",
+"Step 1 INTAKE: Ask for the complete frequency context:",
+"- Full first name as given at birth",
+"- Full middle name(s) if present",
+"- Full last name as given at birth",
+"- Name they actually use day to day (if different)",
+"- Any name they feel privately drawn to",
+"The gap between birth name and used name reveals where consciousness has moved beyond original encoding.",
+"",
+"Step 2 PARALLEL MULTI-SYSTEM ANALYSIS (run ALL simultaneously):",
+"- Pythagorean Numerology: Life Path, Expression, Soul Urge, Personality, all core numbers. Note tension between Soul Urge and Personality.",
+"- Chaldean Numerology: Run parallel to Pythagorean. Where both agree = high confidence. Where they diverge = evolutionary tension.",
+"- Hebrew Gematria: Map to Kabbalistic Tree of Life, identify activated Sephirot",
+"- Sanskrit Phonosemantics: How specific phonemes activate pranic channels",
+"- Sacred Geometry: Dominant geometric family (triangle, circle, spiral, cross). Identify the geometric peak letter and geometric shadow letter.",
+"",
+"CONVERGENCE RULE: Themes appearing across 3+ systems = primary signal (high confidence). Single system = secondary signal. Divergence = evolutionary edge.",
+"",
+"Step 3 SONIC FREQUENCY ANALYSIS:",
+"- Map dominant phoneme frequencies to nearest Solfeggio (396Hz liberation, 417Hz change, 528Hz transformation, 639Hz connection, 741Hz intuition, 852Hz spiritual order, 963Hz divine)",
+"- Consonant-vowel ratio: maps to archetype (warrior, healer, mystic, builder, teacher, creator, bridge-builder)",
+"- Syllabic rhythm: iambic (heartbeat, leader), trochaic (declarative, truth-stater), dactylic (creative, trinity-seeker)",
+"- Inter-name sonic bridge between first and last name",
+"",
+"Step 4 ANCESTRAL FIELD (last name):",
+"- Etymological origin and cultural field",
+"- Root meaning translated vibrationally, not just literally",
+"- Geographic energy (Scandinavian=long dark+sudden light, Mediterranean=sun+depth, Celtic=mist+thin veil)",
+"- Primary unresolved ancestral theme and how first name amplifies or challenges it",
+"",
+"Step 5 PROBABILITY FIELD:",
+"- Current frequency expression",
+"- Potential frequency ceiling (highest octave this name can express)",
+"- Gap between current and ceiling = evolutionary invitation",
+"- Activation keys: specific practices, environments, qualities that close the gap",
+"",
+"Step 6 SYNTHESIS DELIVERY (not a list, a unified transmission):",
+"",
+"YOUR SOUL BLUEPRINT",
+"Core Frequency Statement: One sentence. The fundamental signature of this name.",
+"Soul Primary Gift: What this name came to offer the world.",
+"Evolutionary Edge: What this name asks the soul to develop.",
+"Hidden Power: The frequency most present but most underutilized.",
+"Ancestral Gift: What the lineage most wants this soul to know.",
+"Integration Message: The key awareness from first + last name in relationship.",
+"The Living Question: A question so precise that sitting with it shifts consciousness.",
+"Three Evolutionary Invitations: Concrete, actionable steps.",
+"",
+"After name reading, extract 3-6 search terms from the analysis and query the PEMF API for program recommendations. Include holistic recommendations (each on own line): Energetic focus, Juices, Foods, Emotions, Lifestyle, Colors, Crystals, Fabrics, Nutrients, Oils, Flower essences. Then disclaimer.",
+"",
+"HELP: info@epemf.app. PROGRAMS: 15,732+.",
+"",
+"ANGELIC NUMBER PROTOCOL (trigger: angelic number, angel number, 111, 222, 333, 444, etc.):",
+"",
+"You hold PhD-level mastery across Pythagorean, Chaldean, and Kabbalistic numerology, sacred geometry, the full angelic codex (000-999), astrology, tarot, gematria, Hebrew/Greek alphanumerics, quantum consciousness theory, Sefer Yetzirah, Book of Enoch, and Pythagorean manuscripts.",
+"",
+"For every angelic number reading:",
+"1. Core meaning (layered: surface, deeper, soul level)",
+"2. Vibrational frequency and sacred geometry behind it",
+"3. Which chakra(s) it activates",
+"4. The specific mantra for this number",
+"5. Sanskrit mantra in English (So Hum, Om, Om Namah Shivaya, etc.)",
+"6. Astrological and planetary connections",
+"7. How this number is a frequency portal, not just a symbol",
+"8. Practical guidance: what to do when you see this number",
+"9. How to use PEMF Healing App to receive and amplify the message",
+"",
+"IMPORTANT: Always search API for programs related to the angelic number. Search: the number, chakra, meditation, frequency, alignment.",
+"Include holistic recommendations (each own line): Colors, Crystals, Essential oils, Meditation practice, Affirmation. Then disclaimer."
+].join("\n");
 
-  if (!category || !title || !url) {
-    alert("Please fill all fields");
-    return;
-  }
+var PROMPTS=["Read my palm","Explore my name","I have back pain","Programs for collagen","Help me manage my weight","I have a PEMF Coil and need help","What does Angelic number 1111 mean","I can\u2019t sleep, I need help!"];
+var CATS=["amino acids","chakra","vitamins"];
+var ST=new Set(["i","me","my","the","a","an","is","are","was","were","have","has","had","do","does","did","will","would","can","could","what","this","that","am","it","of","in","to","for","with","on","at","by","from","as","how","please","help","need","want","find","get","tell","know","feel","like","just","some","any","also","more","than","so","if","but","or","and","not","no","up","out","all","here","there","recommend","programs","program","using","use","run","healing","pemf"]);
 
-  if (editIndex === -1) {
-    entries.push({ category, title, url });
-  } else {
-    entries[editIndex] = { category, title, url };
-    editIndex = -1;
-    document.getElementById('addBtn').textContent = "Add Entry";
-  }
+function getC(){try{return JSON.parse(localStorage.getItem("lc")||"[]")}catch(e){return[]}}
+function saveC(c){try{localStorage.setItem("lc",JSON.stringify(c))}catch(e){}}
+function getM(){try{return JSON.parse(localStorage.getItem("lm")||"{}")}catch(e){return{}}}
+function saveM(m){try{localStorage.setItem("lm",JSON.stringify(m))}catch(e){}}
 
-  renderTable();
-  document.getElementById('entryForm').reset();
+function searchP(q){
+  return fetch(PEMF_API+encodeURIComponent(q)).then(function(r){
+    if(!r.ok)throw new Error();
+    return r.json();
+  }).then(function(d){
+    if(!Array.isArray(d)||!d.length)return[];
+    return d.slice(0,2).map(function(p){return{t:p["Program Title"]||"Unknown",u:p["Full URL"]||""}});
+  }).catch(function(){return[]});
 }
 
-function renderTable() {
-  const table = document.getElementById('entriesTable');
-  table.innerHTML = `
-    <tr>
-      <th>Category</th>
-      <th>Title</th>
-      <th>URL</th>
-      <th>Actions</th>
-    </tr>
-  `;
+function gT(t){return t.toLowerCase().replace(/[^a-z0-9\s]/g,"").split(/\s+/).filter(function(x){return x.length>2&&!ST.has(x)}).join(" ")}
+function gH(m){return gT(m.filter(function(x){return x.role==="user"}).map(function(x){return x.text||""}).join(" ")).split(" ").slice(0,4).join(" ")}
+function iS(t){var l=t.trim().toLowerCase();return l.length<=2||/^\d+$/.test(l)||["yes","no","ok","sure","thanks","hello","hi","hey","good","great"].indexOf(l)>=0}
 
-  entries.forEach((entry, index) => {
-    const row = table.insertRow();
-    row.insertCell(0).textContent = entry.category;
-    row.insertCell(1).textContent = entry.title;
-    row.insertCell(2).textContent = entry.url;
-
-    const actions = row.insertCell(3);
-
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "Edit";
-    editBtn.onclick = () => editEntry(index);
-    actions.appendChild(editBtn);
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Delete";
-    deleteBtn.onclick = () => deleteEntry(index);
-    actions.appendChild(deleteBtn);
+function toB(f){
+  return new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){res(r.result.split(",")[1])};
+    r.onerror=rej;
+    r.readAsDataURL(f);
   });
 }
 
-function editEntry(index) {
-  const entry = entries[index];
-  document.getElementById('category').value = entry.category;
-  document.getElementById('title').value = entry.title;
-  document.getElementById('url').value = entry.url;
-  editIndex = index;
-  document.getElementById('addBtn').textContent = "Update Entry";
+function esc(s){var d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
+
+function fmt(t){
+  var h=t;
+  h=h.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>");
+  h=h.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,'<a href="$2" target="_blank" style="color:#C49C25">$1</a>');
+  h=h.replace(/Open Program[:\s]*(https?:\/\/[^\s<]+)/gi,'<a href="$1" target="_blank" style="color:#C49C25">Open Program</a>');
+  h=h.replace(/(https?:\/\/[^\s<\)]+)/g,function(m,u,o,s){
+    var b=s.substring(Math.max(0,o-10),o);
+    if(b.indexOf("href=")>=0||b.indexOf('"')>=0)return m;
+    return '<a href="'+u+'" target="_blank" style="color:#C49C25">Open Program</a>';
+  });
+  h=h.replace(/\n/g,"<br>");
+  return h;
 }
 
-function deleteEntry(index) {
-  if (confirm("Are you sure you want to delete this entry?")) {
-    entries.splice(index, 1);
-    renderTable();
+function tor(sz){
+  var cfgs={xl:[120,44],md:[48,22],sm:[32,16]};
+  var rings={xl:[[90,56,1.5,"rgba(130,90,220,.35)","torusA 6s linear infinite"],[105,68,1,"rgba(100,140,255,.3)","torusB 8s linear infinite"],[78,50,1.5,"rgba(196,156,37,.25)","torusC 10s linear infinite"]],md:[[38,24,1,"rgba(130,90,220,.35)","torusA 6s linear infinite"],[44,28,1,"rgba(100,140,255,.3)","torusB 8s linear infinite"]],sm:[[26,16,.8,"rgba(130,90,220,.3)","torusA 6s linear infinite"],[29,18,.8,"rgba(100,140,255,.25)","torusB 8s linear infinite"]]};
+  var c=cfgs[sz],rr=rings[sz];
+  var h='<div style="position:relative;width:'+c[0]+'px;height:'+c[0]+'px;display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+  h+='<div style="position:absolute;width:'+c[0]+'px;height:'+c[0]+'px;border-radius:50%;background:radial-gradient(circle,rgba(130,90,220,.2),transparent 70%);animation:fieldPulse 4s ease-in-out infinite"></div>';
+  for(var i=0;i<rr.length;i++){var r=rr[i];h+='<div style="position:absolute;width:'+r[0]+'px;height:'+r[1]+'px;top:50%;left:50%;margin-top:-'+r[1]/2+'px;margin-left:-'+r[0]/2+'px;border-radius:50%;border:'+r[2]+'px solid '+r[3]+';animation:'+r[4]+'"></div>';}
+  h+='<img src="'+LOGO+'" style="position:relative;z-index:3;width:'+c[1]+'px;height:'+c[1]+'px;border-radius:50%;object-fit:cover;animation:coreGlow 6s ease-in-out infinite">';
+  h+='</div>';
+  return h;
+}
+
+var view="chat",curId=Date.now().toString(),msgs=[],inp="",ld=false,attF=null,attP=null,listening=false,showH=false,recog=null;
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){recog=new SR();recog.continuous=false;recog.interimResults=false;recog.lang="en-US";recog.onresult=function(e){inp=inp?inp+" "+e.results[0][0].transcript:e.results[0][0].transcript;listening=false;render();var t=document.getElementById("ti");if(t)t.value=inp};recog.onerror=function(){listening=false;render()};recog.onend=function(){listening=false;render()}}
+
+function toggleMic(){if(!recog)return;if(listening){recog.stop();listening=false}else{recog.start();listening=true}render()}
+function pickFile(e){var f=e.target.files?e.target.files[0]:null;if(!f||f.type.indexOf("image/")!==0){e.target.value="";return}attF=f;attP=URL.createObjectURL(f);e.target.value="";render()}
+function rmFile(){attF=null;if(attP)URL.revokeObjectURL(attP);attP=null;render()}
+
+function saveCur(){
+  if(!curId||!msgs.length)return;
+  var ch=getC(),idx=-1;
+  for(var i=0;i<ch.length;i++){if(ch[i].id===curId){idx=i;break}}
+  var fu=null;for(var j=0;j<msgs.length;j++){if(msgs[j].role==="user"){fu=msgs[j];break}}
+  var title=fu?(fu.text||"Chat").slice(0,35):"New Chat";
+  var last=msgs[msgs.length-1];
+  var obj={id:curId,title:title,preview:(last.text||"").slice(0,60),date:new Date().toISOString(),messages:msgs};
+  if(idx>=0)ch[idx]=obj;else ch.unshift(obj);
+  if(ch.length>50)ch.length=50;
+  saveC(ch);
+}
+
+function newChat(){if(msgs.length)saveCur();curId=Date.now().toString();msgs=[];view="chat";inp="";rmFile();showH=false;render()}
+function openChat(id){if(msgs.length)saveCur();var ch=getC();for(var i=0;i<ch.length;i++){if(ch[i].id===id){curId=ch[i].id;msgs=ch[i].messages||[];view="chat";showH=false;render();setTimeout(function(){var e=document.getElementById("ce");if(e)e.scrollIntoView({behavior:"smooth"})},50);return}}}
+function delChat(id,ev){ev.stopPropagation();var ch=getC().filter(function(x){return x.id!==id});saveC(ch);if(curId===id){curId=null;msgs=[]}render()}
+function goList(){if(msgs.length)saveCur();view="list";curId=null;msgs=[];showH=false;render()}
+
+function send(text){
+  var msg=(text||inp||"").trim();
+  if(!msg&&!attF)return;
+  if(ld)return;
+  inp="";showH=false;
+  var um={role:"user",text:msg||"(photo)",img:attP};
+  msgs.push(um);
+  var cf=attF;attF=null;attP=null;
+  ld=true;
+  if(!curId)curId=Date.now().toString();
+  if(view==="list")view="chat";
+  render();
+
+  var topic=iS(msg)?gH(msgs):gT(msg);
+    var skipSearch=/(palm|read my palm|name|explore my name|feel sad|stressed|depressed|lonely|anxious|talk to|someone to talk|hard time|going through)/i.test(msg);
+    if(skipSearch)topic="";
+
+  var doSend=function(pc){
+    var mem=getM();
+    var sysText=SYS;
+    if(mem.name)sysText+="\nUser: "+mem.name;
+    if(mem.device)sysText+="\nDevice: "+mem.device;
+
+    var contents=[];
+    for(var i=0;i<msgs.length;i++){
+      var m=msgs[i];
+      if(m.role==="user"){
+        var txt=m.text+(i===msgs.length-1?pc:"");
+        contents.push({role:"user",parts:[{text:txt}]});
+      }else{
+        contents.push({role:"model",parts:[{text:m.text}]});
+      }
+    }
+
+    var body={
+      contents:contents,
+      systemInstruction:{parts:[{text:sysText}]},
+      generationConfig:{maxOutputTokens:1500}
+    };
+
+    if(cf){
+      toB(cf).then(function(b64){
+        var last=contents[contents.length-1];
+        last.parts.push({inlineData:{mimeType:cf.type||"image/jpeg",data:b64}});
+        return callAPI(body);
+      }).catch(handleErr);
+    }else{
+      callAPI(body);
+    }
+  };
+
+  if(topic.length>2){
+    var allResults=[];
+    searchP(topic).then(function(main){
+      allResults.push({cat:"MAIN",r:main});
+      var catPromises=CATS.map(function(cat){return searchP(topic+" "+cat).then(function(r){if(r.length)allResults.push({cat:cat.toUpperCase(),r:r})})});
+      return Promise.all(catPromises);
+    }).then(function(){
+      var pc="";
+      if(allResults.some(function(x){return x.r.length})){
+        pc="\n\n[PROGRAM DATA ALREADY FETCHED - USE IMMEDIATELY]\n";
+        allResults.forEach(function(x){if(x.r.length)pc+=x.cat+":\n"+x.r.map(function(p){return "- "+p.t+" | Full URL: "+p.u}).join("\n")+"\n"});
+      }
+      doSend(pc);
+    }).catch(function(){doSend("")});
+  }else{
+    doSend("");
   }
 }
 
-function downloadJSON() {
-  const blob = new Blob([JSON.stringify(entries, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "programs_cleaned.json";
-  a.click();
+function callAPI(body){
+  console.log("[LUMA] Calling Gemini API, parts:",body.contents.length);
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(res){
+    return res.json();
+  }).then(function(data){
+    console.log("[LUMA] API response:",JSON.stringify(data).slice(0,500));
+    var reply="A momentary pause in the field. Please try again.";
+    try{reply=data.candidates[0].content.parts[0].text}catch(e){console.error("[LUMA] Parse error:",e)}
+    msgs.push({role:"assistant",text:reply});
+    var ut=msgs.filter(function(x){return x.role==="user"}).map(function(x){return x.text||""}).join(" ").toLowerCase();
+    var nm=ut.match(/(?:my name is|i'm|i am) ([a-z]+)/i);
+    var mem=getM();
+    if(nm){mem.name=nm[1].charAt(0).toUpperCase()+nm[1].slice(1);saveM(mem)}
+    var devs=["headphones","pemf coil","haptic mat","pemf mat","scalar","plasma","itorus","imprinter"];
+    for(var d=0;d<devs.length;d++){if(ut.indexOf(devs[d])>=0){mem.device=devs[d];saveM(mem);break}}
+    saveCur();
+    ld=false;render();
+    setTimeout(function(){var e=document.getElementById("ce");if(e)e.scrollIntoView({behavior:"smooth"});var t=document.getElementById("ti");if(t){t.value="";t.focus()}},50);
+  }).catch(handleErr);
 }
-</script>
 
+function handleErr(e){console.error("[LUMA] Error:",e);
+  msgs.push({role:"assistant",text:"A momentary pause in the field. Please try again."});
+  ld=false;render();
+}
+
+function clearAll(){if(confirm("Clear all chat history?")){saveC([]);curId=null;msgs=[];showH=false;newChat()}}
+function speakMsg(idx){if(msgs[idx])speak(msgs[idx].text)}
+var currentAudio=null;
+var speaking=false;
+
+function speak(text){
+  if(speaking){stopSpeak();return}
+  var clean=text.replace(/\*\*/g,"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/https?:\/\/[^\s]+/g,"").replace(/<[^>]+>/g,"").replace(/[#*_~`>\-]/g,"").replace(/\n+/g,". ").trim();
+  if(!clean)return;
+  if(clean.length>1000)clean=clean.substring(0,1000)+"...";
+  speaking=true;
+  var b=document.getElementById("spkb");
+  if(b){b.style.background="#C49C25";b.style.color="#0A0A08";}
+  console.log("[LUMA] Fetching TTS, text length:",clean.length);
+  Promise.race([
+    fetch(API_URL+"/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input:clean,voice:"shimmer",model:"tts-1"})}),
+    new Promise(function(_,rej){setTimeout(function(){rej(new Error("TTS timeout"))},15000)})
+  ])
+  .then(function(r){
+    console.log("[LUMA] TTS status:",r.status);
+    if(!r.ok)throw new Error("TTS "+r.status);
+    return r.blob();
+  })
+  .then(function(blob){
+    console.log("[LUMA] Audio blob size:",blob.size);
+    if(blob.size<100)throw new Error("Empty audio");
+    var url=URL.createObjectURL(blob);
+    var audio=new Audio(url);
+    currentAudio=audio;
+    audio.onended=function(){URL.revokeObjectURL(url);stopSpeak()};
+    audio.onerror=function(){URL.revokeObjectURL(url);stopSpeak()};
+    audio.play().then(function(){
+      console.log("[LUMA] Audio playing");
+    }).catch(function(e){
+      console.error("[LUMA] Play failed:",e);
+      stopSpeak();
+    });
+  })
+  .catch(function(e){console.error("[LUMA] TTS fetch error:",e);stopSpeak()});
+}
+
+function stopSpeak(){
+  speaking=false;
+  if(currentAudio){try{currentAudio.pause();currentAudio.src=""}catch(e){}currentAudio=null}
+  var b=document.getElementById("spkb");
+  if(b){b.style.background="rgba(106,106,94,.15)";b.style.color="#6a6a5e"}
+}
+
+function toggleSpeak(){
+  if(speaking){stopSpeak();return}
+  var last=null;
+  for(var i=msgs.length-1;i>=0;i--){if(msgs[i].role==="assistant"){last=msgs[i].text;break}}
+  if(last)speak(last);
+}
+
+function speakMsg(idx){if(msgs[idx])speak(msgs[idx].text)}
+
+function scrollBot(){var e=document.getElementById("ce");if(e)e.scrollIntoView({behavior:"smooth"})}
+function updSb(){var sb=document.getElementById("sb");if(!sb)return;var on=(inp&&inp.trim())||attF;sb.style.background=on?"#C49C25":"rgba(106,106,94,.15)";sb.style.color=on?"#0A0A08":"#6a6a5e";sb.style.cursor=on?"pointer":"default";sb.disabled=!on;}
+function render(){var app=document.getElementById("app");if(view==="list")rList(app);else rChat(app)}
+
+function rList(el){
+  var ch=getC(),mem=getM();
+  var name=mem.name?"Welcome back, "+esc(mem.name):"Luma Assist";
+  var h='<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);background:#111110;flex-shrink:0">'+
+    '<div style="display:flex;align-items:center;gap:10px">'+tor("md")+'<div><div style="font-weight:600;font-size:16px;color:#C49C25">'+name+' <span style="font-size:9px;color:#6a6a5e">v2.0</span></div><div style="font-size:11px;color:#6a6a5e">Intelligent, personalized assistant.</div></div></div>'+
+    '<button onclick="newChat()" style="background:transparent;border:1px solid rgba(255,255,255,.05);border-radius:8px;color:#9a9a8a;font-size:11px;padding:6px 12px;cursor:pointer;font-family:inherit;text-transform:uppercase">+ New</button></div>';
+  h+='<div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">';
+  if(!ch.length){
+    h+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;animation:fadeIn .5s ease">'+tor("xl")+'<div style="text-align:center"><div style="font-size:15px;font-weight:600;margin-bottom:8px">No conversations yet</div><div style="font-size:13px;color:#9a9a8a">Tap + New to start.</div></div></div>';
+  }else{
+    for(var i=0;i<ch.length;i++){
+      var c=ch[i],d=new Date(c.date).toLocaleDateString("en-US",{month:"short",day:"numeric"});
+      h+='<div onclick="openChat(\''+c.id+'\')" style="background:#111110;border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:56px"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.title)+'</div><div style="font-size:11px;color:#6a6a5e;margin-top:3px">'+d+'</div></div><button onclick="delChat(\''+c.id+'\',event)" style="background:transparent;border:none;color:#6a6a5e;cursor:pointer">x</button></div>';
+    }
+  }
+  h+='</div><div style="font-size:9px;color:#6a6a5e;text-align:center;padding:4px">\u00a9 2026 PeMF Healing LLC</div>';
+  el.innerHTML=h;
+}
+
+function rChat(el){
+  var isNew=msgs.length===0,mem=getM();
+  var h='<div id="hdr" style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.05);background:#111110;flex-shrink:0;z-index:10;transition:padding .2s ease">'+
+    '<div style="display:flex;align-items:center;gap:10px">'+
+    ''+
+    '<span id="hlogo">'+tor("md")+'</span>'+
+    '<div><div id="htitle" style="font-weight:600;font-size:16px;color:#C49C25;transition:font-size .2s ease">Luma Assist <span style="font-size:9px;color:#6a6a5e">v2.0</span></div><div id="hsub" style="font-size:11px;color:#6a6a5e;transition:all .2s ease">Intelligent, personalized assistant.</div></div></div>'+
+    '<div style="display:flex;gap:8px;align-items:center">';
+  if(msgs.length)h+='<button onclick="newChat()" style="background:transparent;border:1px solid rgba(255,255,255,.05);border-radius:8px;color:#9a9a8a;font-size:11px;padding:6px 12px;cursor:pointer;font-family:inherit;text-transform:uppercase">New</button>';
+  h+='<button onclick="showH=!showH;render()" style="background:transparent;border:none;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+(showH?"#C49C25":"#9a9a8a")+'" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
+  h+='</div></div>';
+
+  if(showH){
+    h+='<div onclick="showH=false;render()" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:19;background:rgba(0,0,0,.5)"></div>';
+    var ch=getC();
+    h+='<div style="position:absolute;top:58px;right:0;width:85%;max-width:320px;bottom:0;background:#111110;border-left:1px solid rgba(255,255,255,.05);z-index:20;display:flex;flex-direction:column;animation:slideIn .2s ease">';
+    h+='<div style="padding:16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between"><span style="font-size:14px;font-weight:600;color:#C49C25">Chat History</span><div style="display:flex;gap:12px;align-items:center"><button onclick="clearAll()" style="background:transparent;border:1px solid rgba(248,113,113,.15);border-radius:6px;color:rgba(248,113,113,.6);font-size:11px;padding:4px 10px;cursor:pointer;font-family:inherit">Clear All</button><button onclick="showH=false;render()" style="background:transparent;border:none;color:#6a6a5e;font-size:18px;cursor:pointer">x</button></div></div>';
+    h+='<div style="flex:1;overflow-y:auto;padding:8px">';
+    if(!ch.length){h+='<div style="padding:20px;text-align:center;color:#6a6a5e;font-size:13px">No past sessions</div>'}
+    else{for(var si=0;si<ch.length;si++){var s=ch[si];h+='<div onclick="openChat(\''+s.id+'\')" style="padding:14px 12px;border-radius:8px;margin-bottom:8px;cursor:pointer;border:1px solid '+(s.id===curId?"rgba(196,156,37,.2)":"#1a1a14")+';background:'+(s.id===curId?"rgba(196,156,37,.08)":"transparent")+'"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(s.title)+'</div><div style="font-size:11px;color:#6a6a5e;margin-top:3px">'+new Date(s.date).toLocaleDateString("en-US",{month:"short",day:"numeric"})+'</div></div>'}}
+    h+='</div></div>';
+  }
+
+  h+='<div id="ca" style="flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch">';
+
+  if(isNew){
+    var g=mem.name?"Welcome to Luma Assist, "+esc(mem.name):"Welcome to Luma Assist";
+    h+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;animation:fadeIn .5s ease">'+tor("xl")+
+    '<div style="text-align:center;max-width:320px"><div style="font-size:17px;font-weight:600;margin-bottom:8px">'+g+'</div><div style="font-size:14px;color:#9a9a8a;line-height:1.7">I help you find PEMF programs, guide device sessions, offer emotional support, read palms, and decode angelic numbers.</div></div>'+
+    '<div style="font-size:11px;color:#6a6a5e;font-weight:600;letter-spacing:1px;text-transform:uppercase">Here are a few ideas, or type directly</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:320px">';
+    for(var pi=0;pi<PROMPTS.length;pi++){
+      var p=PROMPTS[pi];
+      h+='<button onclick="send(\''+p.replace(/'/g,"\\'").replace(/\u2019/g,"\\'")+
+      '\')" style="background:#111110;border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:14px 12px;color:#C8C8B8;font-size:14px;font-family:inherit;font-weight:500;cursor:pointer;text-align:left;line-height:1.5;min-height:52px;display:flex;align-items:center">'+esc(p)+'</button>';
+    }
+    h+='</div></div>';
+  }
+
+  for(var mi=0;mi<msgs.length;mi++){
+    var m=msgs[mi];
+    if(m.role==="user"){
+      h+='<div style="display:flex;justify-content:flex-end;animation:fadeIn .3s ease"><div style="max-width:85%;padding:12px 16px;border-radius:8px;font-size:14px;line-height:1.75;background:#C49C25;color:#0A0A08;font-weight:500">'+(m.img?'<img src="'+m.img+'" style="max-width:100%;max-height:200px;border-radius:6px;margin-bottom:8px;display:block">':'')+(m.text!=="(photo)"?esc(m.text):"")+'</div></div>';
+    }else{
+      h+='<div style="display:flex;align-items:flex-start;animation:fadeIn .3s ease">'+tor("sm")+'<div style="max-width:85%;padding:12px 16px;border-radius:8px;font-size:14px;line-height:1.75;background:#111110;border:1px solid rgba(255,255,255,.05);margin-left:8px">'+fmt(m.text)+'</div></div>';
+    }
+  }
+
+  if(ld){
+    h+='<div style="display:flex;align-items:flex-start;animation:fadeIn .2s ease">'+tor("sm")+'<div style="padding:12px 16px;border-radius:8px;background:#111110;border:1px solid rgba(255,255,255,.05);margin-left:8px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#C49C25;animation:pulse 1.2s infinite"></span> <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#C49C25;animation:pulse 1.2s .2s infinite"></span> <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#C49C25;animation:pulse 1.2s .4s infinite"></span><span style="font-size:11px;color:#6a6a5e;margin-left:8px">Decoding resonance...</span></div></div>';
+  }
+
+  h+='<div id="ce"></div></div>';
+  h+='<button id="stb" onclick="scrollBot()" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:rgba(196,156,37,.25);color:#C49C25;border:1px solid rgba(196,156,37,.3);cursor:pointer;z-index:15;align-items:center;justify-content:center;backdrop-filter:blur(4px)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 19 19 12"/></svg></button>';
+
+  if(attP){
+    h+='<div style="padding:8px 16px 0;background:rgba(17,17,16,.8);border-top:1px solid rgba(255,255,255,.03);display:flex;align-items:center;gap:8px"><div style="position:relative"><img src="'+attP+'" style="height:48px;border-radius:6px;border:1px solid rgba(255,255,255,.06)"><button onclick="rmFile()" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:rgba(248,113,113,.6);border:none;color:#0A0A08;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center">x</button></div><span style="font-size:11px;color:#6a6a5e">Image attached</span></div>';
+  }
+
+  var ti=document.getElementById("ti");var can=((inp&&inp.trim())||(ti&&ti.value&&ti.value.trim())||attF)&&!ld;
+  h+='<div style="padding:14px 16px calc(26px + env(safe-area-inset-bottom, 0px));border-top:1px solid rgba(255,255,255,.05);background:#111110;flex-shrink:0"><input type="file" id="fi" accept="image/*" style="display:none" onchange="pickFile(event)"><div style="display:flex;align-items:flex-end;background:#0A0A08;border-radius:24px;border:1px solid rgba(255,255,255,.05);padding:6px 8px">'+
+  '<button onclick="document.getElementById(\'fi\').click()" style="width:44px;height:44px;border-radius:50%;border:none;background:transparent;color:#9a9a8a;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'+
+  '<textarea id="ti" rows="1" placeholder="Ask Luma anything..." onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();send()}" oninput="inp=this.value;updSb()" style="flex:1;background:transparent;border:none;outline:none;color:#F0EBE0;font-size:16px;resize:none;font-family:inherit;line-height:1.5;padding:10px 4px;max-height:80px">'+esc(inp)+'</textarea>'+
+  
+  '<button id="spkb" onclick="toggleSpeak()" style="width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(106,106,94,.15);color:#6a6a5e;transition:all .2s"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>'+
+  '<div style="width:6px"></div>'+
+  '<button id="sb" onclick="send()" '+(can?"":"disabled")+' style="width:44px;height:44px;border-radius:50%;border:none;cursor:'+(can?"pointer":"default")+';background:'+(can?"#C49C25":"rgba(106,106,94,.15)")+';color:'+(can?"#0A0A08":"#6a6a5e")+';display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>'+
+  '</div></div>';
+
+  el.innerHTML=h;
+}
+
+render();
+setTimeout(function(){var s=document.getElementById("splash");if(s)s.remove()},2500);
+
+// Header shrink on scroll + scroll-to-bottom button
+setInterval(function(){
+  var ca=document.getElementById("ca");
+  var hdr=document.getElementById("hdr");
+  if(ca&&hdr){
+    if(ca.scrollTop>40){
+      hdr.style.padding="6px 16px";
+      var sub=document.getElementById("hsub");
+      if(sub)sub.style.display="none";
+      var logo=document.getElementById("hlogo");
+      if(logo)logo.style.display="none";
+      var title=document.getElementById("htitle");
+      if(title)title.style.fontSize="13px";
+    }else{
+      hdr.style.padding="12px 16px";
+      var sub=document.getElementById("hsub");
+      if(sub)sub.style.display="block";
+      var logo=document.getElementById("hlogo");
+      if(logo)logo.style.display="flex";
+      var title=document.getElementById("htitle");
+      if(title)title.style.fontSize="16px";
+    }
+  }
+},200);
+// Scroll-to-bottom button visibility
+setInterval(function(){
+  var ca=document.getElementById("ca");
+  var stb=document.getElementById("stb");
+  if(ca&&stb){
+    var atBottom=ca.scrollHeight-ca.scrollTop-ca.clientHeight<100;
+    stb.style.display=atBottom?"none":"flex";
+  }
+},500);
+
+// Register Service Worker for PWA
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+</script>
 </body>
 </html>

@@ -56,6 +56,8 @@ var SYS=[
 "",
 "RULES: Never use em-dashes. Number all options. NEVER give medical advice. Always assume PEMF Healing App. When [PROGRAM DATA] provided, use IMMEDIATELY. NEVER invent programs or URLs.",
 "",
+"GREETINGS: When someone says hi, hello, or greets you, respond warmly and briefly. Introduce yourself as Luma. Ask how you can help today. Do NOT assume they are sad or emotional unless they say so. Keep greetings light, warm, and inviting.",
+"",
 "MANDATORY FLOW (NEVER skip steps):",
 "Step 1: ALWAYS ask device FIRST no matter what the user says:",
 "What device are you using?",
@@ -351,12 +353,13 @@ function saveCur(){
   saveC(ch);
 }
 
-function newChat(){if(msgs.length)saveCur();curId=Date.now().toString();msgs=[];view="chat";inp="";rmFile();showH=false;render()}
+function newChat(){stopSpeak();if(msgs.length)saveCur();curId=Date.now().toString();msgs=[];view="chat";inp="";rmFile();showH=false;render()}
 function openChat(id){if(msgs.length)saveCur();var ch=getC();for(var i=0;i<ch.length;i++){if(ch[i].id===id){curId=ch[i].id;msgs=ch[i].messages||[];view="chat";showH=false;render();setTimeout(function(){var e=document.getElementById("ce");if(e)e.scrollIntoView({behavior:"smooth"})},50);return}}}
 function delChat(id,ev){ev.stopPropagation();var ch=getC().filter(function(x){return x.id!==id});saveC(ch);if(curId===id){curId=null;msgs=[]}render()}
 function goList(){if(msgs.length)saveCur();view="list";curId=null;msgs=[];showH=false;render()}
 
 function send(text){
+  stopSpeak();
   var msg=(text||inp||"").trim();
   if(!msg&&!attF)return;
   if(ld)return;
@@ -461,14 +464,14 @@ function speak(text){
   if(speaking){stopSpeak();return}
   var clean=text.replace(/\*\*/g,"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/https?:\/\/[^\s]+/g,"").replace(/<[^>]+>/g,"").replace(/[#*_~`>\-]/g,"").replace(/\n+/g,". ").trim();
   if(!clean)return;
-  if(clean.length>1000)clean=clean.substring(0,1000)+"...";
+  if(clean.length>500)clean=clean.substring(0,500)+"...";
   speaking=true;
   var b=document.getElementById("spkb");
   if(b){b.style.background="#C49C25";b.style.color="#0A0A08";}
   console.log("[LUMA] Fetching TTS, text length:",clean.length);
   Promise.race([
-    fetch(API_URL+"/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input:clean,voice:"shimmer",model:"tts-1"})}),
-    new Promise(function(_,rej){setTimeout(function(){rej(new Error("TTS timeout"))},15000)})
+    fetch(API_URL+"/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input:clean,voice:"nova",model:"tts-1"})}),
+    new Promise(function(_,rej){setTimeout(function(){rej(new Error("TTS timeout"))},30000)})
   ])
   .then(function(r){
     console.log("[LUMA] TTS status:",r.status);

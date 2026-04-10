@@ -373,6 +373,7 @@ function send(text){
   render();
 
   var topic=iS(msg)?gH(msgs):gT(msg);
+    if(msgs.length>2&&topic.length<10){var ctx=gH(msgs);if(ctx.length>topic.length)topic=ctx+" "+topic}
     var skipSearch=/(palm|read my palm|name|explore my name|feel sad|stressed|depressed|lonely|anxious|talk to|someone to talk|hard time|going through)/i.test(msg);
     if(skipSearch)topic="";
 
@@ -396,7 +397,7 @@ function send(text){
     var body={
       contents:contents,
       systemInstruction:{parts:[{text:sysText}]},
-      generationConfig:{maxOutputTokens:1500}
+      generationConfig:{maxOutputTokens:2500}
     };
 
     if(cf){
@@ -459,6 +460,7 @@ function clearAll(){if(confirm("Clear all chat history?")){saveC([]);curId=null;
 function speakMsg(idx){if(msgs[idx])speak(msgs[idx].text)}
 var currentAudio=null;
 var speaking=false;
+var ttsCancel=false;
 
 function speak(text){
   if(speaking){stopSpeak();return}
@@ -466,6 +468,7 @@ function speak(text){
   if(!clean)return;
   if(clean.length>300)clean=clean.substring(0,300)+"...";
   speaking=true;
+  ttsCancel=false;
   var b=document.getElementById("spkb");
   if(b){b.style.background="#C49C25";b.style.color="#0A0A08";b.style.animation="pulse 1s infinite";}
   console.log("[LUMA] Fetching TTS, text length:",clean.length);
@@ -482,6 +485,7 @@ function speak(text){
     console.log("[LUMA] Audio blob size:",blob.size);
     if(blob.size<100)throw new Error("Empty audio");
     var url=URL.createObjectURL(blob);
+    if(ttsCancel){URL.revokeObjectURL(url);stopSpeak();return}
     var audio=new Audio(url);
     currentAudio=audio;
     audio.onended=function(){URL.revokeObjectURL(url);stopSpeak()};
@@ -498,7 +502,8 @@ function speak(text){
 
 function stopSpeak(){
   speaking=false;
-  if(currentAudio){try{currentAudio.pause();currentAudio.src=""}catch(e){}currentAudio=null}
+  ttsCancel=true;
+  if(currentAudio){try{currentAudio.pause();currentAudio.src="";currentAudio=null}catch(e){currentAudio=null}}
   var b=document.getElementById("spkb");
   if(b){b.style.background="rgba(106,106,94,.15)";b.style.color="#6a6a5e";b.style.animation="none"}
 }

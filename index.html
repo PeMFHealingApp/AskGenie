@@ -464,13 +464,13 @@ function speak(text){
   if(speaking){stopSpeak();return}
   var clean=text.replace(/\*\*/g,"").replace(/\[([^\]]+)\]\([^)]+\)/g,"$1").replace(/https?:\/\/[^\s]+/g,"").replace(/<[^>]+>/g,"").replace(/[#*_~`>\-]/g,"").replace(/\n+/g,". ").trim();
   if(!clean)return;
-  if(clean.length>500)clean=clean.substring(0,500)+"...";
+  if(clean.length>300)clean=clean.substring(0,300)+"...";
   speaking=true;
   var b=document.getElementById("spkb");
-  if(b){b.style.background="#C49C25";b.style.color="#0A0A08";}
+  if(b){b.style.background="#C49C25";b.style.color="#0A0A08";b.style.animation="pulse 1s infinite";}
   console.log("[LUMA] Fetching TTS, text length:",clean.length);
   Promise.race([
-    fetch(API_URL+"/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input:clean,voice:"nova",model:"tts-1"})}),
+    fetch(API_URL+"/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input:clean,voice:"nova",model:"tts-1",response_format:"mp3",speed:1.0})}),
     new Promise(function(_,rej){setTimeout(function(){rej(new Error("TTS timeout"))},30000)})
   ])
   .then(function(r){
@@ -487,7 +487,7 @@ function speak(text){
     audio.onended=function(){URL.revokeObjectURL(url);stopSpeak()};
     audio.onerror=function(){URL.revokeObjectURL(url);stopSpeak()};
     audio.play().then(function(){
-      console.log("[LUMA] Audio playing");
+      console.log("[LUMA] Audio playing");var b=document.getElementById("spkb");if(b)b.style.animation="none";
     }).catch(function(e){
       console.error("[LUMA] Play failed:",e);
       stopSpeak();
@@ -500,7 +500,7 @@ function stopSpeak(){
   speaking=false;
   if(currentAudio){try{currentAudio.pause();currentAudio.src=""}catch(e){}currentAudio=null}
   var b=document.getElementById("spkb");
-  if(b){b.style.background="rgba(106,106,94,.15)";b.style.color="#6a6a5e"}
+  if(b){b.style.background="rgba(106,106,94,.15)";b.style.color="#6a6a5e";b.style.animation="none"}
 }
 
 function toggleSpeak(){

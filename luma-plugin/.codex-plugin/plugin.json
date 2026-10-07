@@ -1,9 +1,4 @@
 {
-  "author": {
-    "name": "epemf.app",
-    "url": "https://epemf.app"
-  },
-  "description": "Find PEMF Healing App programs with verified links, thoughtful guidance, and emotional support.",
   "interface": {
     "capabilities": [
       "skills"
@@ -22,7 +17,13 @@
     "shortDescription": "PEMF programs and guidance"
   },
   "name": "gpt-d94475ee77f47edb9fc2249db8561a4b",
-  "skills": "./skills/",
-  "version": "0.63.2"
+  "version": "0.63.3",
+  "description": "Find PEMF Healing App programs with verified links, thoughtful guidance, and emotional support.",
+  "author": {
+    "name": "epemf.app",
+    "url": "https://epemf.app"
+  },
+  "keywords": [],
+  "skills": "./skills",
+  "mcpServers": "./.mcp.json"
 }
-

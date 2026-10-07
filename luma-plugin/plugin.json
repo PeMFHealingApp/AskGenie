@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "gpt-d94475ee77f47edb9fc2249db8561a4b",
-  "version": "0.63.2",
+  "version": "0.63.3",
   "description": "Find PEMF Healing App programs with verified links, thoughtful guidance, and emotional support.",
   "author": {
     "name": "epemf.app",

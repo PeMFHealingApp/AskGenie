@@ -1,0 +1,4 @@
+interface:
+  default_prompt: I feel sad, talk to me!
+  display_name: Luma Assist
+  short_description: Find PEMF programs and verified links with thoughtful guidance

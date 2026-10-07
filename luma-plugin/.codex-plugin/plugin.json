@@ -1,0 +1,28 @@
+{
+  "author": {
+    "name": "epemf.app",
+    "url": "https://epemf.app"
+  },
+  "description": "Find PEMF Healing App programs with verified links, thoughtful guidance, and emotional support.",
+  "interface": {
+    "capabilities": [
+      "skills"
+    ],
+    "category": "Education & Research",
+    "composerIcon": "./assets/gpt-icon.png",
+    "defaultPrompt": [
+      "I feel sad, talk to me!",
+      "Read my palm",
+      "Recommend Programs for Collagen"
+    ],
+    "developerName": "epemf.app",
+    "displayName": "Luma Assist",
+    "logo": "./assets/gpt-icon.png",
+    "longDescription": "Find PEMF Healing App programs with verified links, thoughtful guidance, and emotional support. Explore symbolic palm, name, and angelic-number interpretations when requested.",
+    "shortDescription": "PEMF programs and guidance"
+  },
+  "name": "gpt-d94475ee77f47edb9fc2249db8561a4b",
+  "skills": "./skills/",
+  "version": "0.63.2"
+}
+
